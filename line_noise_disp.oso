@@ -1,0 +1,85 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.13.0.@PROJECT_VERSION_TWEAK@"dev"
+# options: 
+shader line_noise_disp
+param	float	dispAmount1	0		%read{21,21} %write{2147483647,-1}
+param	float	dispAmount2	0		%read{18,18} %write{2147483647,-1}
+param	float	dispNoise	0		%read{21,21} %write{2147483647,-1}
+param	float	disp_height	0		%read{18,18} %write{2147483647,-1}
+param	float	line_width	0		%read{14,17} %write{2147483647,-1}
+param	int	pattern_freq	0		%read{4,4} %write{2147483647,-1}
+param	float	pattern_threshold	0		%read{9,9} %write{2147483647,-1}
+oparam	float	disp	0		%read{2147483647,-1} %write{20,22}
+global	point	P	%read{1,1} %write{2147483647,-1}
+local	point	oP	%read{2,5} %write{1,1}
+local	float	dist	%read{14,16} %write{3,3}
+local	float	noiseValue	%read{7,22} %write{6,13}
+local	float	___346_factor	%read{19,19} %write{17,17}
+const	string	$const1	"object"		%read{1,1} %write{2147483647,-1}
+const	string	$const2	"transform"		%read{0,0} %write{2147483647,-1}
+const	string	$const3	"common"		%read{1,1} %write{2147483647,-1}
+const	int	$const4	2		%read{2,2} %write{2147483647,-1}
+temp	float	$tmp1	%read{3,3} %write{2,2}
+const	string	$const5	"perlin"		%read{6,6} %write{2147483647,-1}
+temp	point	$tmp2	%read{6,6} %write{5,5}
+temp	point	$tmp3	%read{5,5} %write{4,4}
+temp	float	$tmp4	%read{8,8} %write{7,7}
+temp	float	$tmp5	%read{10,10} %write{9,9}
+temp	int	$tmp6	%read{11,11} %write{10,10}
+const	int	$const6	0		%read{12,12} %write{2147483647,-1}
+const	float	$const7	0.00999999978		%read{13,13} %write{2147483647,-1}
+temp	int	$tmp7	%read{15,15} %write{14,14}
+const	float	$const8	0		%read{17,17} %write{2147483647,-1}
+temp	float	$tmp8	%read{17,17} %write{16,16}
+temp	float	$tmp9	%read{19,19} %write{18,18}
+temp	float	$tmp10	%read{20,20} %write{19,19}
+temp	float	$tmp11	%read{22,22} %write{21,21}
+code ___main___
+# shader_src/noise_line_disp.osl:13
+#     point oP = transform("object", P);
+	functioncall	$const2 2 	%filename{"shader_src/noise_line_disp.osl"} %line{13} %argrw{"r"}
+# /Applications/Pixar/RenderManProServer-26.1/lib/osl/include/stdosl.h:263
+# point  transform (string to, point p)  { return transform("common",to,p); }
+	transform	oP $const3 $const1 P 	%filename{"/Applications/Pixar/RenderManProServer-26.1/lib/osl/include/stdosl.h"} %line{263} %argrw{"wrrr"}
+# shader_src/noise_line_disp.osl:15
+#     float dist = abs(oP[2]);
+	compref		$tmp1 oP $const4 	%filename{"shader_src/noise_line_disp.osl"} %line{15} %argrw{"wrr"}
+	abs		dist $tmp1 	%argrw{"wr"}
+# shader_src/noise_line_disp.osl:16
+#     float noiseValue = noise("perlin", oP * pattern_freq); 
+	assign		$tmp3 pattern_freq 	%line{16} %argrw{"wr"}
+	mul		$tmp2 oP $tmp3 	%argrw{"wrr"}
+	noise		noiseValue $const5 $tmp2 	%argrw{"wrr"}
+# shader_src/noise_line_disp.osl:17
+#     noiseValue = -abs(noiseValue);
+	abs		$tmp4 noiseValue 	%line{17} %argrw{"wr"}
+	neg		noiseValue $tmp4 	%argrw{"wr"}
+# shader_src/noise_line_disp.osl:19
+#     if (noiseValue < -pattern_threshold) {
+	neg		$tmp5 pattern_threshold 	%line{19} %argrw{"wr"}
+	lt		$tmp6 noiseValue $tmp5 	%argrw{"wrr"}
+	if		$tmp6 13 14 	%argrw{"r"}
+# shader_src/noise_line_disp.osl:20
+#         noiseValue = 0;  // Make the noise subtle
+	assign		noiseValue $const6 	%line{20} %argrw{"wr"}
+# shader_src/noise_line_disp.osl:22
+#         noiseValue *= 0.01;  // Make the noise subtle
+	mul		noiseValue noiseValue $const7 	%line{22} %argrw{"wrr"}
+# shader_src/noise_line_disp.osl:26
+#     if (dist < line_width) {
+	lt		$tmp7 dist line_width 	%line{26} %argrw{"wrr"}
+	if		$tmp7 21 23 	%argrw{"r"}
+# shader_src/noise_line_disp.osl:27
+#         float factor = smoothstep(0, line_width, line_width - dist);
+	sub		$tmp8 line_width dist 	%line{27} %argrw{"wrr"}
+	smoothstep	___346_factor $const8 line_width $tmp8 	%argrw{"wrrr"}
+# shader_src/noise_line_disp.osl:28
+#         disp = noiseValue + dispAmount2 * disp_height * factor;
+	mul		$tmp9 dispAmount2 disp_height 	%line{28} %argrw{"wrr"}
+	mul		$tmp10 $tmp9 ___346_factor 	%argrw{"wrr"}
+	add		disp noiseValue $tmp10 	%argrw{"wrr"}
+# shader_src/noise_line_disp.osl:31
+#         disp = noiseValue + dispAmount1 * dispNoise;
+	mul		$tmp11 dispAmount1 dispNoise 	%line{31} %argrw{"wrr"}
+	add		disp noiseValue $tmp11 	%argrw{"wrr"}
+	end

@@ -1,0 +1,42 @@
+shader line_noise_disp(
+    float dispAmount1 = 0.0,
+    float dispAmount2 = 0.0,
+    float dispNoise = 0.0,
+    float disp_height = 0.0,
+    float line_width = 0.0,
+    int pattern_freq = 0,
+    float pattern_threshold = 0,
+    output float disp = 0.0,
+)
+{
+    // Transform the point to object space
+    point oP = transform("object", P);
+    // Calculate the distance from the z-axis 
+    float dist = abs(oP[2]);
+    float noiseValue = noise("perlin", oP * pattern_freq); 
+    noiseValue = -abs(noiseValue);
+
+    // Make the noise subtle
+    if (noiseValue < -pattern_threshold) {
+        noiseValue = 0;  
+    } else {
+        noiseValue *= 0.01;  
+    }
+
+    // Apply line displacement if within line width
+    if (dist < line_width) {
+        float factor = smoothstep(0, line_width, line_width - dist);
+        disp = noiseValue + dispAmount2 * disp_height * factor;
+    } else {
+    // Apply noise displacement
+        disp = noiseValue + dispAmount1 * dispNoise;
+    }
+}
+
+
+
+
+
+
+
+
